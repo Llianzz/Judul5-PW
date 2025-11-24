@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Trafford</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        .history-scroll::-webkit-scrollbar { width: 6px; }
+        .history-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .history-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .history-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .btn-calc:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <div class="flex flex-col md:flex-row gap-6 max-w-4xl w-full items-start justify-center">
+        
+        <div class="w-full md:w-96 bg-white rounded-3xl shadow-2xl shadow-gray-300/50 border border-gray-200 overflow-hidden">
+            
+            <div class="bg-gray-50 p-6 text-right relative border-b border-gray-100">
+                <span id="memory-indicator" class="absolute top-2 left-4 text-xs text-red-600 font-bold hidden">M</span>
+                
+                <div id="prev-display" class="text-gray-500 text-sm h-6 overflow-hidden mb-1 tracking-wide whitespace-nowrap text-ellipsis"></div>
+                
+                <div id="current-display" class="text-4xl font-bold text-gray-900 tracking-wider break-all">0</div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1 bg-white p-2 border-b border-gray-200">
+                <button onclick="memoryClear()" class="p-2 text-xs text-gray-500 hover:text-red-600 font-bold transition rounded">MC</button>
+                <button onclick="memoryRecall()" class="p-2 text-xs text-gray-500 hover:text-gray-900 font-bold transition rounded">MR</button>
+                <button onclick="memoryPlus()" class="p-2 text-xs text-gray-500 hover:text-gray-900 font-bold transition rounded">M+</button>
+                <button onclick="memoryMinus()" class="p-2 text-xs text-gray-500 hover:text-gray-900 font-bold transition rounded">M-</button>
+            </div>
+
+            <div class="grid grid-cols-4 gap-3 p-5 bg-gray-50">
+                <button onclick="clearEntry()" class="btn-calc h-14 rounded-xl bg-gradient-to-br from-red-400 to-red-600 text-white font-bold hover:from-red-500 hover:to-red-700 transition shadow-sm">CE</button>
+                <button onclick="clearAll()" class="btn-calc h-14 rounded-xl bg-gradient-to-br from-red-400 to-red-600 text-white font-bold hover:from-red-500 hover:to-red-700 transition shadow-sm">C</button>
+                <button onclick="deleteChar()" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 transition"><i class="fas fa-backspace"></i></button>
+                <button onclick="appendOperator('/')" class="btn-calc h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white text-2xl hover:from-red-600 hover:to-red-800 transition shadow-sm">÷</button>
+
+                <button onclick="appendNumber('7')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">7</button>
+                <button onclick="appendNumber('8')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">8</button>
+                <button onclick="appendNumber('9')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">9</button>
+                <button onclick="appendOperator('*')" class="btn-calc h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white text-2xl hover:from-red-600 hover:to-red-800 transition shadow-sm">×</button>
+
+                <button onclick="appendNumber('4')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">4</button>
+                <button onclick="appendNumber('5')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">5</button>
+                <button onclick="appendNumber('6')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">6</button>
+                <button onclick="appendOperator('-')" class="btn-calc h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white text-2xl hover:from-red-600 hover:to-red-800 transition shadow-sm">−</button>
+
+                <button onclick="appendNumber('1')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">1</button>
+                <button onclick="appendNumber('2')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">2</button>
+                <button onclick="appendNumber('3')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">3</button>
+                <button onclick="appendOperator('+')" class="btn-calc h-14 rounded-xl bg-gradient-to-br from-red-500 to-red-700 text-white text-2xl hover:from-red-600 hover:to-red-800 transition shadow-sm">+</button>
+
+                <button onclick="appendNumber('0')" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition col-span-2">0</button>
+                <button onclick="appendDot()" class="btn-calc h-14 rounded-xl bg-gray-200 text-gray-800 text-2xl font-semibold hover:bg-gray-300 transition">.</button>
+                <button onclick="calculate(true)" class="btn-calc h-14 rounded-xl bg-gradient-to-r from-red-600 via-red-700 to-red-800 text-white text-3xl font-bold hover:from-red-700 hover:to-red-900 transition shadow-lg shadow-red-600/40">=</button>
+            </div>
+        </div>
+
+        <div class="w-full md:w-64 bg-white rounded-3xl shadow-xl border border-gray-200 p-5 h-auto md:h-[500px] flex flex-col">
+            <h3 class="text-red-600 font-bold uppercase tracking-wider text-sm mb-4 border-b border-gray-200 pb-2">
+                <i class="fas fa-history mr-2"></i> History
+            </h3>
+            <ul id="history-list" class="flex-1 space-y-3 overflow-y-auto history-scroll text-sm">
+                <li class="text-gray-400 text-center italic text-xs mt-10">Belum ada riwayat</li>
+            </ul>
+            <button onclick="clearHistory()" class="mt-4 w-full py-2 text-xs bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition font-semibold border border-red-100">
+                Hapus Riwayat
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+      
+        let currentInput = '0';
+        let previousInput = '';
+        let operator = null;
+        let shouldResetScreen = false;
+        let memory = 0;
+        let history = [];
+        
+        let calculationString = ''; 
+
+        const currentDisplayElement = document.getElementById('current-display');
+        const prevDisplayElement = document.getElementById('prev-display');
+        const historyListElement = document.getElementById('history-list');
+        const memoryIndicator = document.getElementById('memory-indicator');
+
+        function getDisplayOperator(op) {
+            if (op === '*') return '×';
+            if (op === '/') return '÷';
+            return op;
+        }
+
+        function updateDisplay() {
+            currentDisplayElement.textContent = currentInput;
+            prevDisplayElement.textContent = calculationString;
+        }
+
+        function appendNumber(number) {
+            if (currentInput === '0' || shouldResetScreen) {
+                currentInput = number;
+                shouldResetScreen = false;
+            } else {
+                if (currentInput.length < 12) currentInput += number;
+            }
+            updateDisplay();
+        }
+
+        function appendDot() {
+            if (shouldResetScreen) {
+                currentInput = '0';
+                shouldResetScreen = false;
+            }
+            if (!currentInput.includes('.')) currentInput += '.';
+            updateDisplay();
+        }
+
+        function appendOperator(newOp) {
+            if (shouldResetScreen && operator !== null) {
+                operator = newOp;
+                let trimmed = calculationString.trim().slice(0, -1); 
+                calculationString = trimmed + getDisplayOperator(newOp) + " ";
+                updateDisplay();
+                return;
+            }
+
+            if (operator !== null) {
+                calculate(false); 
+            } else {
+                previousInput = currentInput;
+            }
+
+            if (previousInput === '') calculationString = '';
+            
+            if (calculationString === '') {
+                 calculationString = currentInput + ' ' + getDisplayOperator(newOp) + ' ';
+            } else {   
+            }
+        }
+        
+        let lastUserEntry = ''; 
+
+        const originalAppendNumber = appendNumber;
+        appendNumber = function(number) {
+            originalAppendNumber(number);
+            lastUserEntry = currentInput;
+        }
+
+        appendOperator = function(newOp) {
+             if (shouldResetScreen && operator !== null) {
+                operator = newOp;
+                calculationString = calculationString.slice(0, -2) + getDisplayOperator(newOp) + " ";
+                updateDisplay();
+                return;
+            }
+
+            if (operator !== null) {
+                calculationString += currentInput + ' ' + getDisplayOperator(newOp) + ' ';
+                
+                calculate(false);
+            } else {
+                calculationString = currentInput + ' ' + getDisplayOperator(newOp) + ' ';
+                previousInput = currentInput;
+            }
+
+            operator = newOp;
+            shouldResetScreen = true;
+            updateDisplay();
+        }
+
+        function calculate(isFinal = false) {
+            if (operator === null || (shouldResetScreen && isFinal)) return;
+
+            let a = parseFloat(previousInput);
+            let b = parseFloat(currentInput);
+            let result;
+
+            if (isNaN(a) || isNaN(b)) return;
+
+            if (operator === '/' && b === 0) {
+                alert("Error: Tidak bisa membagi dengan nol!");
+                clearAll();
+                return;
+            }
+
+            switch (operator) {
+                case '+': result = a + b; break;
+                case '-': result = a - b; break;
+                case '*': result = a * b; break;
+                case '/': result = a / b; break;
+                default: return;
+            }
+
+            result = Math.round(result * 100000000) / 100000000;
+
+            if (isFinal) {
+                let fullEquation = calculationString + currentInput;
+                addToHistory(fullEquation, result);
+                
+                calculationString = ''; 
+                prevDisplayElement.textContent = fullEquation + " ="; 
+                
+                operator = null;
+                previousInput = '';
+            } else {
+                
+            }
+
+            currentInput = result.toString();
+            shouldResetScreen = true;
+            updateDisplay();
+            
+        }
+
+        function addToHistory(equation, result) {
+            const item = { equation, result };
+            history.unshift(item);
+            if (history.length > 5) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            historyListElement.innerHTML = '';
+            if (history.length === 0) {
+                historyListElement.innerHTML = '<li class="text-gray-400 text-center italic text-xs mt-10">Belum ada riwayat</li>';
+                return;
+            }
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.className = "bg-white p-3 rounded-lg border-l-4 border-red-500 shadow-sm hover:bg-gray-50 transition cursor-pointer border border-gray-100";
+                li.innerHTML = `
+                    <div class="text-gray-500 text-xs mb-1 tracking-wide">${item.equation} =</div>
+                    <div class="text-gray-900 font-bold text-lg">${item.result}</div>
+                `;
+                li.onclick = () => {
+                    currentInput = item.result.toString();
+                    calculationString = '';
+                    operator = null;
+                    updateDisplay();
+                };
+                historyListElement.appendChild(li);
+            });
+        }
+
+        function clearHistory() {
+            history = [];
+            renderHistory();
+        }
+
+        function clearAll() {
+            currentInput = '0';
+            previousInput = '';
+            operator = null;
+            calculationString = '';
+            shouldResetScreen = false;
+            updateDisplay();
+        }
+
+        function clearEntry() { 
+            currentInput = '0'; 
+            updateDisplay(); 
+        }
+
+        function deleteChar() {
+            if (shouldResetScreen) return;
+            currentInput = currentInput.toString().slice(0, -1);
+            if (currentInput === '' || currentInput === '-') currentInput = '0';
+            updateDisplay();
+        }
+
+        function toggleMemoryIndicator() { memoryIndicator.style.display = memory !== 0 ? 'block' : 'none'; }
+        function memoryPlus() { memory += parseFloat(currentInput); shouldResetScreen = true; toggleMemoryIndicator(); }
+        function memoryMinus() { memory -= parseFloat(currentInput); shouldResetScreen = true; toggleMemoryIndicator(); }
+        function memoryRecall() { currentInput = memory.toString(); shouldResetScreen = true; updateDisplay(); }
+        function memoryClear() { memory = 0; toggleMemoryIndicator(); }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') appendNumber(e.key);
+            if (e.key === '.') appendDot();
+            if (e.key === '=' || e.key === 'Enter') { e.preventDefault(); calculate(true); }
+            if (e.key === 'Backspace') deleteChar();
+            if (e.key === 'Escape') clearAll();
+            if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') appendOperator(e.key);
+        });
+    </script>
+</body>
+</html>
